@@ -1,0 +1,29 @@
+name: Publish debug APK to Release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Attach APK to GitHub Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download built APK from run 42772311298
+        env:
+          GH_TOKEN: \${{ github.token }}
+        run: |
+          gh run download 42772311298 --repo xuchuanhk-prog/HGhub --name android-debug -D apk
+          mv apk/app-universal-debug.apk apk/HGhub_1.2.1_debug.apk
+          ls -lh apk
+
+      - name: Create release with APK
+        env:
+          GH_TOKEN: \${{ github.token }}
+        run: |
+          gh release create v1.2.1-debug apk/HGhub_1.2.1_debug.apk \\
+            --repo xuchuanhk-prog/HGhub \\
+            --title "HGhub v1.2.1 debug (Android)" \\
+            --notes "Debug-signed APK built from v1.2.1 source (includes playback fix PR #46). Different signature from official builds - uninstall any older HGhub first."
